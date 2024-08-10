@@ -6,6 +6,13 @@ const ProjectPage = () => {
   const [tasks, setTasks] = useState(null); // null until data is fetched
   const [loading, setLoading] = useState(true);
 
+  // State to manage new task inputs for each column
+  const [newTasks, setNewTasks] = useState({
+    todo: { title: '', member: '', dueDate: '' },
+    inProgress: { title: '', member: '', dueDate: '' },
+    done: { title: '', member: '', dueDate: '' },
+  });
+
   useEffect(() => {
     // Fetch tasks from the API
     const fetchTasks = async () => {
@@ -29,11 +36,41 @@ const ProjectPage = () => {
     fetchTasks();
   }, []);
 
+  // Function to handle new task input changes
+  const handleInputChange = (column, e) => {
+    const { name, value } = e.target;
+    setNewTasks((prevState) => ({
+      ...prevState,
+      [column]: { ...prevState[column], [name]: value },
+    }));
+  };
+
+  // Function to handle task creation for a specific column
+  const createTask = (column) => {
+    const newTaskObj = {
+      id: Date.now(),
+      title: newTasks[column].title || 'New Task',
+      member: newTasks[column].member || 'Unassigned',
+      dueDate: newTasks[column].dueDate || '2024-08-25',
+    };
+
+    setTasks((prevState) => ({
+      ...prevState,
+      [column]: [...prevState[column], newTaskObj],
+    }));
+
+    // Reset new task input fields for that column
+    setNewTasks((prevState) => ({
+      ...prevState,
+      [column]: { title: '', member: '', dueDate: '' },
+    }));
+  };
+
   // Function to handle task deletion
   const handleDelete = (column, taskId) => {
     setTasks((prevState) => ({
       ...prevState,
-      [column]: prevState[column].filter(task => task.id !== taskId),
+      [column]: prevState[column].filter((task) => task.id !== taskId),
     }));
   };
 
