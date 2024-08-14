@@ -8,7 +8,7 @@ const {protect} = require('../Middleware/authMiddleware');
 router.post('/', registerUser); // This is the route handler for the POST /api/users/register route.
 router.post('/login', loginUser); // This is the route handler for the POST /api/users/login route.
 router.post('/user',  getCurrentUser); // This is the route handler for the GET /api/users/current route. We use the protect middleware function to protect this route.
-router.put('/update-password', updatePassword); // This is the route handler for the PUT /api/users/update-password route. We use the protect middleware function to protect this route.
+router.get('/:id', updatePassword); // This is the route handler for the PUT /api/users/update-password route. We use the protect middleware function to protect this route.
 router.post('/update-user',  updateUser); // This is the route handler for the PUT /api/users/update-username route. We use the protect middleware function to protect this route.
 
 

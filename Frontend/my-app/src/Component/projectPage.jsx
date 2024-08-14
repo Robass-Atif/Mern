@@ -1,15 +1,42 @@
+import axios from 'axios';
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
+
 
 const ProjectPage = () => {
+
+
+
+
+
+
   const { title } = useParams();
+  const navigate = useNavigate(); // Initialize useNavigate hook
   const [projectId, setProjectId] = useState(""); // Store project ID
+  const[userId, setUserId] = useState("");
   const [projectDescription, setProjectDescription] = useState(""); // Store project description
   const [tasks, setTasks] = useState({
     todo: [],
     inProgress: [],
     done: []
   });
+
+
+
+  // const getId = async () => {
+
+  //   const res=await axios.post('http://localhost:5000/api/users/user', {
+  //     email: email,
+    
+  //   });
+  //   console.log(res.data);
+  //   setUserId(res.data._id);
+    
+  //   };
+
+
+
+
   const [newTasks, setNewTasks] = useState({
     todo: { title: '', member: '', dueDate: '' },
     inProgress: { title: '', member: '', dueDate: '' },
@@ -31,7 +58,8 @@ const ProjectPage = () => {
   
         // Assuming data contains both project and tasks
         const { project, tasks } = data;
-  
+        console.log('Project:', project);
+          setUserId(project.User);
         // Update project state
         setProjectId(project._id);
         setProjectDescription(project.description || 'No description available');
@@ -131,6 +159,36 @@ const ProjectPage = () => {
     }
   };
 
+  const handleBackToDashboard = async () => {
+    try {
+      // Fetch the user data
+      const response = await fetch(`http://localhost:5000/api/users/${userId}`, {
+        method: 'GET',
+      });
+  
+      // Check if the response is OK
+      if (!response.ok) {
+        throw new Error('Network response was not ok.');
+      }
+  
+      // Parse the JSON response
+      const data = await response.json();
+      
+      // Check if the email is available in the response
+      if (data.email) {
+        // Navigate to the Dashboard page with email
+        navigate('/dashboard', { state: { email: data.email } });
+      } else {
+        console.error('Email not found in response data.');
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      // Optionally, set a message for the user
+      // setMessage('Failed to fetch user data. Please try again.');
+    }
+  };
+  
+
   if (loading) {
     return <p className="text-gray-600">Loading project details...</p>;
   }
@@ -200,6 +258,12 @@ const ProjectPage = () => {
           </div>
         ))}
       </main>
+
+      <div className="mt-8 text-center">
+        <button onClick={handleBackToDashboard} className="p-2 bg-gray-600 text-white rounded shadow-lg hover:bg-gray-700 transition duration-200">
+          Back to Dashboard
+        </button>
+      </div>
     </div>
   );
 };

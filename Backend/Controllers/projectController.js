@@ -12,7 +12,7 @@ const createProject = async (req, res) => {
     const { email, title, description, tasks } = req.body;
 
     // Debug the received data
-    // console.log('Received data:', req.body);
+    // console.log('Received data:', email, title, description, tasks);
 
     // Find the user by email
     const user = await User.findOne({ email });
@@ -21,6 +21,7 @@ const createProject = async (req, res) => {
     // if (!user) {
     //   return res.status(404).json({ error: 'User not found' });
     // }
+
 
     // Create a new project instance with the user's ID
     const project = new Project({
@@ -47,23 +48,44 @@ const createProject = async (req, res) => {
 
 
 // Get all projects
+
 const getAllProjects = async (req, res) => {
   try {
-    const projects = await Project.find().populate('tasks'); 
+    const { userEmail } = req.body; // Get the email from the request body
+
+    console.log(userEmail);
+    // if (!email) {
+    //   return res.status(400).json({ error: 'Email is required' });
+    // }
+
+    // Step 1: Find the user by email
+    const user = await User.findOne({ email:userEmail});
+    
+    // if (!user) {
+    //   return res.status(404).json({ error: 'User not found' });
+    // }
+console.log(user);
+    const userId = user._id; // Get the user ID
+
+    // Step 2: Fetch projects associated with the user ID
+    const projects = await Project.find({ User:userId });
+    
+    console.log(projects);
     res.status(200).json(projects);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
+
 
 // Get a single project by ID
 const getProjectByTitle = async (req, res) => {
   try {
     // Find the project by its title
     const project = await Project.findOne({ title: req.params.title });
-    console.log(project);
+    // console.log(project);
     const tasks = await Task.find({ project: project._id });
-    console.log(tasks);
+    // console.log(tasks);
     // Return the project along with its tasks
     res.status(200).json({ project, tasks });
   } catch (error) {

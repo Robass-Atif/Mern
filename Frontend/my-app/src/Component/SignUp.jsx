@@ -12,7 +12,7 @@ const SignupPage = () => {
 
   const handleSignup = async (e) => {
     e.preventDefault();
-    // setLoading(true);
+    setLoading(true);
     try {
       const response = await axios.post('http://localhost:5000/api/users', {
         name,
@@ -31,8 +31,9 @@ const SignupPage = () => {
     } catch (error) {
       console.error('Error signing up:', error.response ? error.response.data.message : error.message);
       setMessage(error.response ? error.response.data.message : 'An error occurred');
+    } finally {
+      setLoading(false);
     }
-    
   };
 
   return (
@@ -73,8 +74,18 @@ const SignupPage = () => {
           </button>
         </form>
       
-        
         {message && <p className="mt-4 text-center text-red-600">{message}</p>}
+        
+        {/* Login Button */}
+        <div className="mt-4 text-center">
+          <p className="text-gray-600">Already have an account?</p>
+          <button
+            onClick={() => navigate('/login')} // Navigate to the login page
+            className="mt-2 text-indigo-600 hover:text-indigo-800 font-bold"
+          >
+            Login
+          </button>
+        </div>
       </div>
     </div>
   );

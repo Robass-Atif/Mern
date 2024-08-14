@@ -23,7 +23,7 @@ const createTask = asyncHandler(async (req, res) => {
   // console.log('Creating task with data:', { title, member, dueDate, column, project });
 
   // // Validate the project ID
-  console.log("1");
+  // console.log("1");
   const project1 = await Project.findById(project);
   // if (!project1) {
   //   return res.status(404).json({ message: 'Project not found' });
@@ -31,7 +31,7 @@ const createTask = asyncHandler(async (req, res) => {
 
   // Create a new task in the database
   try {
-  console.log("2");
+  // console.log("2");
 
     const task = await Task.create({
       text: text, // Map 'title' to 'text'
@@ -40,10 +40,10 @@ const createTask = asyncHandler(async (req, res) => {
       status: status || 'todo', // Default to 'todo' if no column is provided
       dueDate,
     });
-  console.log("3");
+  // console.log("3");
 
 
-    console.log('Task created:', task); // Log the created task
+    // console.log('Task created:', task); // Log the created task
 
     res.status(201).json(task); // Send the created task as response
   } catch (error) {

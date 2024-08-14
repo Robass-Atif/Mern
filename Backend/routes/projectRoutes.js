@@ -14,7 +14,7 @@ const {
 router.post('/', createProject);
 
 // Route to get all projects
-router.get('/', getAllProjects);
+router.post('/all', getAllProjects);
 
 // Route to get a project by ID
 router.get('/:title', getProjectByTitle);

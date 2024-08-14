@@ -1,28 +1,39 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-// use params to get email from login  page
-import { useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const DashboardPage = () => {
-  const location = useLocation();
-
-  useEffect(() => {
-    const { email } = location.state || {};
-    console.log('Location state:', location.state);
-    setUserEmail(email);
-  }, [location.state]);
+  const [userEmail, setUserEmail] = useState('');
   const [projects, setProjects] = useState([]);
-  const [userEmail, setUserEmail] = useState(''); // Replace with actual email fetching logic
   const [newProject, setNewProject] = useState({ title: '', description: '' });
   const navigate = useNavigate();
+  const location = useLocation();
 
+  // UseEffect to set userEmail when component mounts or location.state changes
   useEffect(() => {
-    // Fetch the projects from an API
+    const { email } = location.state || {};
+    if (email) {
+      setUserEmail(email);
+    }
+  }, [location.state]);
+
+  // UseEffect to fetch projects when userEmail changes
+  useEffect(() => {
+    if (!userEmail) return; // Do nothing if userEmail is not set
+
     const fetchProjects = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/projects',
-          
-        ); // Adjust the API endpoint as needed
+        console.log('Fetching projects for:', userEmail);
+        const response = await fetch('http://localhost:5000/api/projects/all', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ userEmail }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
         const data = await response.json();
         setProjects(data);
       } catch (error) {
@@ -31,10 +42,9 @@ const DashboardPage = () => {
     };
 
     fetchProjects();
-  }, []);
+  }, [userEmail]);
 
   const handleProfileClick = () => {
-    // Redirect to the user-profile page with the email as a state
     navigate('/user-profile', { state: { email: userEmail } });
   };
 
@@ -57,15 +67,15 @@ const DashboardPage = () => {
         body: JSON.stringify({
           title: newProject.title,
           description: newProject.description,
-          tasks: [], // Ensure this matches what the backend expects
-          email: userEmail, // Add userEmail to the request body
+          tasks: [],
+          email: userEmail,
         }),
       });
-  
+
       if (response.ok) {
         const data = await response.json();
         setProjects((prev) => [...prev, data]);
-        setNewProject({ title: '', description: '' }); // Clear form fields
+        setNewProject({ title: '', description: '' });
       } else {
         const errorText = await response.text();
         console.error('Failed to create project:', errorText);
@@ -74,16 +84,17 @@ const DashboardPage = () => {
       console.error('Error creating project:', error);
     }
   };
-  
+
   return (
     <div className="min-h-screen bg-gray-100">
       <header className="bg-white p-4 shadow">
         <nav className="flex justify-between items-center">
           <a href="#" className="text-lg font-bold">Dashboard</a>
           <div className="flex items-center">
-            <button 
-              onClick={handleProfileClick} 
-              className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg">
+            <button
+              onClick={handleProfileClick}
+              className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg"
+            >
               Profile
             </button>
           </div>
@@ -125,11 +136,12 @@ const DashboardPage = () => {
           <ul className="mt-2">
             {projects.length > 0 ? (
               projects.map((project) => (
-                <li key={project.id} className="flex justify-between items-center bg-white shadow p-4 rounded-lg mt-2">
+                <li key={project._id} className="flex justify-between items-center bg-white shadow p-4 rounded-lg mt-2">
                   <p>{project.title}</p>
-                  <button 
-                    onClick={() => window.location.href = `/project/${project.title}`} 
-                    className="bg-indigo-600 text-white px-4 py-2 rounded-lg">
+                  <button
+                    onClick={() => navigate(`/project/${project.title}`)}
+                    className="bg-indigo-600 text-white px-4 py-2 rounded-lg"
+                  >
                     Go to Project
                   </button>
                 </li>

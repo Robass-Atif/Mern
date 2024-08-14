@@ -67,6 +67,17 @@ const LoginPage = () => {
           </button>
         </form>
         {message && <p className="mt-4 text-center text-red-600">{message}</p>}
+        
+        {/* Sign Up Button */}
+        <div className="mt-4 text-center">
+          <p className="text-gray-600">Don't have an account?</p>
+          <button
+            onClick={() => navigate('/signup')} // Navigate to the signup page
+            className="mt-2 text-indigo-600 hover:text-indigo-800 font-bold"
+          >
+            Sign Up
+          </button>
+        </div>
       </div>
     </div>
   );
