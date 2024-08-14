@@ -3,7 +3,7 @@ const router = express.Router();
 const {
   createProject,
   getAllProjects,
-  getProjectById,
+  getProjectByTitle,
   updateProjectById,
   deleteProjectById,
   addTaskToProject,
@@ -17,7 +17,7 @@ router.post('/', createProject);
 router.get('/', getAllProjects);
 
 // Route to get a project by ID
-router.get('/:id', getProjectById);
+router.get('/:title', getProjectByTitle);
 
 // Route to update a project by ID
 router.put('/:id', updateProjectById);

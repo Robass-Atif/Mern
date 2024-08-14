@@ -1,23 +1,50 @@
 const Project = require('../Models/projectModel');
 const Task = require('../Models/taskModel');
+// import user
+const User=require('../Models/userModel');
+
+// Create a new project
+
 
 // Create a new project
 const createProject = async (req, res) => {
   try {
-    const { title, description, tasks } = req.body;
+    const { email, title, description, tasks } = req.body;
 
+    // Debug the received data
+    // console.log('Received data:', req.body);
+
+    // Find the user by email
+    const user = await User.findOne({ email });
+    // console.log('User found:', user);
+    
+    // if (!user) {
+    //   return res.status(404).json({ error: 'User not found' });
+    // }
+
+    // Create a new project instance with the user's ID
     const project = new Project({
+      User: user._id, // Use the found user's ID
       title,
       description,
       tasks // Array of task IDs
     });
 
+    // Save the project to the database
     const savedProject = await project.save();
+    // console.log('Saved project:', savedProject);
+
+    // Return the saved project as a response
     res.status(201).json(savedProject);
   } catch (error) {
+    console.error('Error creating project:', error);
     res.status(400).json({ error: error.message });
   }
 };
+
+
+
+
 
 // Get all projects
 const getAllProjects = async (req, res) => {
@@ -30,17 +57,20 @@ const getAllProjects = async (req, res) => {
 };
 
 // Get a single project by ID
-const getProjectById = async (req, res) => {
+const getProjectByTitle = async (req, res) => {
   try {
-    const project = await Project.findById(req.params.id).populate('tasks');
-    if (!project) {
-      return res.status(404).json({ error: 'Project not found' });
-    }
-    res.status(200).json(project);
+    // Find the project by its title
+    const project = await Project.findOne({ title: req.params.title });
+    console.log(project);
+    const tasks = await Task.find({ project: project._id });
+    console.log(tasks);
+    // Return the project along with its tasks
+    res.status(200).json({ project, tasks });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 };
+
 
 // Update a project by ID
 const updateProjectById = async (req, res) => {
@@ -115,7 +145,7 @@ const removeTaskFromProject = async (req, res) => {
 module.exports = {
   createProject,
   getAllProjects,
-  getProjectById,
+  getProjectByTitle,
   updateProjectById,
   deleteProjectById,
   addTaskToProject,

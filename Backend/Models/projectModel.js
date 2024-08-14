@@ -1,14 +1,13 @@
 const mongoose = require('mongoose');
+const Schema = mongoose.Schema; // Import Schema
 
 // Define the Project schema
-const projectSchema = mongoose.Schema({
-    // user
-    User: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
-    },
-
+const projectSchema = new Schema({
+  User: { 
+    type: Schema.Types.ObjectId, 
+    ref: 'User', 
+    required: [true, 'User ID is required'] 
+  },
   title: {
     type: String,
     required: [true, 'Title is required']
@@ -18,7 +17,7 @@ const projectSchema = mongoose.Schema({
     required: [true, 'Description is required']
   },
   tasks: [{
-    type: mongoose.Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId, // Use Schema.Types.ObjectId
     ref: 'Task'
   }],
 }, {

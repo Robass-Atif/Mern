@@ -9,9 +9,9 @@ const connectDB = require('./Connect/database');
 const cors = require('cors'); // Import CORS middleware
 
 // Import routes
-const projectRoutes = require('./Routes/projectRoutes');
+const projectRoutes = require('./routes/projectRoutes');
 const taskRoutes = require('./Routes/taskRoutes');
-const userRoutes = require('./Routes/userRoutes');
+const userRoutes = require('./routes/userRoutes');
 
 // Initialize express app
 const app = express();

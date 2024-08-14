@@ -20,7 +20,9 @@ const DashboardPage = () => {
     // Fetch the projects from an API
     const fetchProjects = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/projects'); // Adjust the API endpoint as needed
+        const response = await fetch('http://localhost:5000/api/projects',
+          
+        ); // Adjust the API endpoint as needed
         const data = await response.json();
         setProjects(data);
       } catch (error) {
@@ -47,26 +49,32 @@ const DashboardPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:5000/api/projects', { // Adjust the API endpoint as needed
+      const response = await fetch('http://localhost:5000/api/projects', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(newProject),
+        body: JSON.stringify({
+          title: newProject.title,
+          description: newProject.description,
+          tasks: [], // Ensure this matches what the backend expects
+          email: userEmail, // Add userEmail to the request body
+        }),
       });
+  
       if (response.ok) {
-        // Fetch updated project list
         const data = await response.json();
         setProjects((prev) => [...prev, data]);
         setNewProject({ title: '', description: '' }); // Clear form fields
       } else {
-        console.error('Failed to create project');
+        const errorText = await response.text();
+        console.error('Failed to create project:', errorText);
       }
     } catch (error) {
       console.error('Error creating project:', error);
     }
   };
-
+  
   return (
     <div className="min-h-screen bg-gray-100">
       <header className="bg-white p-4 shadow">
@@ -120,7 +128,7 @@ const DashboardPage = () => {
                 <li key={project.id} className="flex justify-between items-center bg-white shadow p-4 rounded-lg mt-2">
                   <p>{project.title}</p>
                   <button 
-                    onClick={() => window.location.href = `/project/${project.id}`} 
+                    onClick={() => window.location.href = `/project/${project.title}`} 
                     className="bg-indigo-600 text-white px-4 py-2 rounded-lg">
                     Go to Project
                   </button>

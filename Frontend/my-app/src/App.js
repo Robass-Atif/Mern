@@ -18,7 +18,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<Dashboard />} />
           {/* Dynamic routing for ProjectPage */}
-          <Route path="/project/:projectId" element={<ProjectPage />} />
+          <Route path="/project/:title" element={<ProjectPage />} />
           <Route path="/user-profile" element={<UserProfilePage />} />
         </Routes>
       </div>
