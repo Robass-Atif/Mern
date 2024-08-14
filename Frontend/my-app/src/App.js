@@ -6,16 +6,19 @@ import Dashboard from './Component/Dashboard';
 import ProjectPage from './Component/projectPage';
 import UserProfilePage from './Component/UserProfile';
 import Landing from './Component/Landing/Landing';
+import Login from './Component/Login';
 
 function App() {
   return (
     <Router>
       <div>
         <Routes>
-          <Route path="/" element={<Landing /> } />
+          <Route path="/" element={<Landing />} />
           <Route path="/signup" element={<SignUp />} />
+          <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/project" element={<ProjectPage />} />
+          {/* Dynamic routing for ProjectPage */}
+          <Route path="/project/:projectId" element={<ProjectPage />} />
           <Route path="/user-profile" element={<UserProfilePage />} />
         </Routes>
       </div>

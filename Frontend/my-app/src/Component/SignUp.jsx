@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const SignupPage = () => {
   const [name, setName] = useState('');
@@ -7,28 +8,31 @@ const SignupPage = () => {
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate(); // Hook for navigation
 
   const handleSignup = async (e) => {
     e.preventDefault();
-    setLoading(true);
-
+    // setLoading(true);
     try {
-      const response = await axios.post('/api/signup', {
+      const response = await axios.post('http://localhost:5000/api/users', {
         name,
         email,
-        password
+        password,
       });
-
+    
+      console.log(response.data);
       if (response.data.success) {
         setMessage('Signup successful!');
+        navigate('/login'); // Redirect to the login page
       } else {
-        setMessage('Signup failed. Please try again.');
+        console.error('Signup failed:', response.data.message);
+        setMessage(response.data.message || 'Signup failed');
       }
     } catch (error) {
-      setMessage('An error occurred. Please try again.');
-    } finally {
-      setLoading(false);
+      console.error('Error signing up:', error.response ? error.response.data.message : error.message);
+      setMessage(error.response ? error.response.data.message : 'An error occurred');
     }
+    
   };
 
   return (
@@ -68,12 +72,8 @@ const SignupPage = () => {
             {loading ? 'Signing Up...' : 'Sign Up'}
           </button>
         </form>
-        <button className="w-full p-2 mt-2 bg-blue-600 text-white rounded">
-          Sign Up with Facebook
-        </button>
-        <a href="#forgot" className="block text-center text-indigo-600 mt-4">
-          Forgot Password?
-        </a>
+      
+        
         {message && <p className="mt-4 text-center text-red-600">{message}</p>}
       </div>
     </div>
