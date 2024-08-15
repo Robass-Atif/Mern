@@ -14,16 +14,7 @@ const getTasks = asyncHandler(async (req, res) => {
 const createTask = asyncHandler(async (req, res) => {
   const { text, assignedTo, dueDate, status, project } = req.body;
 
-  // Validate required fields
-  // if (!title || !dueDate || !project) {
-  //   return res.status(400).json({ message: 'Title, due date, and project are required' });
-  // }
-
-  // // Log incoming data for debugging
-  // console.log('Creating task with data:', { title, member, dueDate, column, project });
-
-  // // Validate the project ID
-  // console.log("1");
+ 
   const project1 = await Project.findById(project);
   // if (!project1) {
   //   return res.status(404).json({ message: 'Project not found' });
@@ -31,7 +22,6 @@ const createTask = asyncHandler(async (req, res) => {
 
   // Create a new task in the database
   try {
-  // console.log("2");
 
     const task = await Task.create({
       text: text, // Map 'title' to 'text'
@@ -40,7 +30,7 @@ const createTask = asyncHandler(async (req, res) => {
       status: status || 'todo', // Default to 'todo' if no column is provided
       dueDate,
     });
-  // console.log("3");
+  
 
 
     // console.log('Task created:', task); // Log the created task
@@ -82,19 +72,9 @@ const deleteTask = asyncHandler(async (req, res) => {
   //   res.status(404);
   //   // throw new Error("Task not found");
   // }
-  // console.log("ajdsa");
+  
 
-//   const user = await User.findById(req.user.id); // Find the user by id.
-//   // if (!user) {
-//   //   res.status(401);
-//   //   // throw new Error("User not found");
-//   // }
-// console.log(user);
-  // if (task.user.toString() !== user.id) {
-  //   res.status(401);
-  //   // throw new Error("Not authorized to delete");
-  // }
-
+// 
   await Task.findByIdAndDelete(req.params.id); // Delete the task from the database.
   res.status(200).json({ id: req.params.id }); // Send a JSON response with the id of the deleted task.
 });

@@ -83,9 +83,9 @@ const getProjectByTitle = async (req, res) => {
   try {
     // Find the project by its title
     const project = await Project.findOne({ title: req.params.title });
-    // console.log(project);
+  
     const tasks = await Task.find({ project: project._id });
-    // console.log(tasks);
+    
     // Return the project along with its tasks
     res.status(200).json({ project, tasks });
   } catch (error) {

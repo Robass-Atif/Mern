@@ -4,7 +4,9 @@ import { useNavigate, useLocation } from 'react-router-dom';
 const DashboardPage = () => {
   const [userEmail, setUserEmail] = useState('');
   const [projects, setProjects] = useState([]);
+  const [filteredProjects, setFilteredProjects] = useState([]);
   const [newProject, setNewProject] = useState({ title: '', description: '' });
+  const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -36,6 +38,7 @@ const DashboardPage = () => {
         }
         const data = await response.json();
         setProjects(data);
+        setFilteredProjects(data); // Initialize filteredProjects with all projects
       } catch (error) {
         console.error('Failed to fetch projects:', error);
       }
@@ -54,6 +57,17 @@ const DashboardPage = () => {
       ...prev,
       [name]: value,
     }));
+  };
+
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+
+    // Filter projects based on the search term
+    const filtered = projects.filter((project) =>
+      project.title.toLowerCase().includes(value.toLowerCase())
+    );
+    setFilteredProjects(filtered);
   };
 
   const handleSubmit = async (e) => {
@@ -75,6 +89,7 @@ const DashboardPage = () => {
       if (response.ok) {
         const data = await response.json();
         setProjects((prev) => [...prev, data]);
+        setFilteredProjects((prev) => [...prev, data]); // Update filteredProjects with new project
         setNewProject({ title: '', description: '' });
       } else {
         const errorText = await response.text();
@@ -133,9 +148,16 @@ const DashboardPage = () => {
         </section>
         <section className="mt-4">
           <h2 className="text-lg font-bold text-gray-800">Your Projects</h2>
+          <input
+            type="text"
+            placeholder="Search projects"
+            value={searchTerm}
+            onChange={handleSearchChange}
+            className="w-full p-2 mt-2 border border-gray-300 rounded"
+          />
           <ul className="mt-2">
-            {projects.length > 0 ? (
-              projects.map((project) => (
+            {filteredProjects.length > 0 ? (
+              filteredProjects.map((project) => (
                 <li key={project._id} className="flex justify-between items-center bg-white shadow p-4 rounded-lg mt-2">
                   <p>{project.title}</p>
                   <button

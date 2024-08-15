@@ -63,7 +63,7 @@ const loginUser = asyncHandler(async (req, res) => {
 // Get Current User
 const getCurrentUser = asyncHandler(async (req, res) => {
   const { email } = req.body; // Use req.body for POST request
-  console.log(email);
+  // console.log(email);
 
 
   if (!email) {
@@ -72,10 +72,7 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 
   try {
     const user = await User.findOne({ email });
-    // console.log(user);
-    // if (!user) {
-    //   return res.status(404).json({ error: 'User not found' });
-    // }
+    
 
 
     // now send the response

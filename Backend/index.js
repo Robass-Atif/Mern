@@ -33,6 +33,8 @@ app.use(express.json());
 app.use('/api/projects', projectRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/auth', require('./routes/authRoutes'));
+
 
 // Global error handling middleware
 app.use((err, req, res, next) => {
