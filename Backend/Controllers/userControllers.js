@@ -10,7 +10,7 @@ let Transport=nodemailer.createTransport({
   service: 'Gmail',
   auth: {
     user: "rcode6681@gmail.com", // Your email id
-    pass: "jgzlrbnujwtfppal"
+    pass: ""
   }
 
 });

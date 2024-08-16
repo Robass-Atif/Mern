@@ -16,8 +16,7 @@ const userRoutes = require('./routes/userRoutes');
 // const authRoutes = require('./routes/authRoutes'); // Uncomment if you have authRoutes
 
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const googleId = "697063750023-7nha10stlk2j37gijq3p2kvgbmpmpu9r.apps.googleusercontent.com";
-const googleSecret = "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";
+
 
 // Initialize express app
 const app = express();
