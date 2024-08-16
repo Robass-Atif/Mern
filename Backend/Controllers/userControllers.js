@@ -134,7 +134,7 @@ const updateUser = asyncHandler(async (req, res) => {
 const updatePassword = asyncHandler(async (req, res) => {
   // Get userId from URL parameters
   const userId = req.params.id;
-  // console.log(userId);
+  
 
   // Find the user by userId
   const user = await User.findById(userId);

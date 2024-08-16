@@ -9,7 +9,7 @@ const SignupPage = () => {
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate(); // Hook for navigation
+  const navigate = useNavigate();
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -21,44 +21,40 @@ const SignupPage = () => {
         password,
       });
 
-      console.log(response.data);
       if (response.data.success) {
         setMessage('Signup successful!');
-        navigate('/login'); // Redirect to the login page
+        navigate('/login');
       } else {
-        console.error('Signup failed:', response.data.message);
         setMessage(response.data.message || 'Signup failed');
       }
     } catch (error) {
-      console.error('Error signing up:', error.response ? error.response.data.message : error.message);
       setMessage(error.response ? error.response.data.message : 'An error occurred');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleGoogleSignup = async (credentialResponse) => {
+  const handleGoogleSignup = async (response) => {
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/google', {
-        token: credentialResponse.credential,
+      const token = response.credential;
+      const googleResponse = await axios.post('http://localhost:5000/api/auth/google', {
+        token,
       });
 
-      console.log(response.data);
-      if (response.data.success) {
+      console.log(googleResponse);
+      if (googleResponse.data.success) {
         setMessage('Signup successful!');
-        navigate('/dashboard'); // Redirect to the dashboard or another page
+        navigate('/login');
       } else {
-        console.error('Signup failed:', response.data.message);
-        setMessage(response.data.message || 'Signup failed');
+        setMessage(googleResponse.data.message || 'Signup failed');
       }
     } catch (error) {
-      console.error('Error signing up with Google:', error.response ? error.response.data.message : error.message);
       setMessage(error.response ? error.response.data.message : 'An error occurred');
     }
   };
 
   return (
-    <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
+    <GoogleOAuthProvider clientId="904871389860-139ek3mn9vdr98hf85v5n4s7degvh0el.apps.googleusercontent.com">
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
           <h2 className="text-2xl font-bold text-gray-800">Sign Up</h2>
@@ -99,23 +95,13 @@ const SignupPage = () => {
           {message && <p className="mt-4 text-center text-red-600">{message}</p>}
 
           {/* Sign Up with Google Button */}
-          <div className="mt-4 text-center">
-            <GoogleLogin
-              onSuccess={handleGoogleSignup}
-              onError={() => {
-                setMessage('Google Sign Up failed');
-              }}
-              className="w-full p-2 mt-4 bg-red-600 text-white rounded"
-            >
-              Sign Up with Google
-            </GoogleLogin>
-          </div>
+          
 
           {/* Login Button */}
           <div className="mt-4 text-center">
             <p className="text-gray-600">Already have an account?</p>
             <button
-              onClick={() => navigate('/login')} // Navigate to the login page
+              onClick={() => navigate('/login')}
               className="mt-2 text-indigo-600 hover:text-indigo-800 font-bold"
             >
               Login

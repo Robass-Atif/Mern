@@ -38,10 +38,11 @@ const LoginPage = () => {
   const handleGoogleLoginSuccess = async (response) => {
     try {
       const tokenId = response.credential;
-      const res = await axios.post('http://localhost:5000/api/users/google-login', {
+      console.log("Token ID:", tokenId);  // Confirm that this prints the token
+      const res = await axios.post('http://localhost:5000/api/auth/google', {
         tokenId,
       });
-
+  
       if (res.data.success) {
         setMessage('Google login successful!');
         navigate('/dashboard', { state: { email: res.data.email } });
@@ -53,9 +54,10 @@ const LoginPage = () => {
       setMessage('An error occurred with Google login. Please try again.');
     }
   };
+  
 
   return (
-    <GoogleOAuthProvider clientId="YOUR_GOOGLE_CLIENT_ID">
+    <GoogleOAuthProvider clientId="904871389860-139ek3mn9vdr98hf85v5n4s7degvh0el.apps.googleusercontent.com">
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
           <h2 className="text-2xl font-bold text-gray-800">Login</h2>
