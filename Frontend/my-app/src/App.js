@@ -7,6 +7,7 @@ import ProjectPage from './Component/projectPage';
 import UserProfilePage from './Component/UserProfile';
 import Landing from './Component/Landing/Landing';
 import Login from './Component/Login';
+import UserOtpVerification from './Component/UserOtpVerification';
 
 function App() {
   return (
@@ -17,6 +18,8 @@ function App() {
           <Route path="/signup" element={<SignUp />} />
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/VerifyEmial" element={<UserOtpVerification/>} />
+
           {/* Dynamic routing for ProjectPage */}
           <Route path="/project/:title" element={<ProjectPage />} />
           <Route path="/user-profile" element={<UserProfilePage />} />

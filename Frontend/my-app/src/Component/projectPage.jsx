@@ -228,6 +228,7 @@ const ProjectPage = () => {
               <input
                 type="text"
                 name="title"
+                required
                 placeholder="Task Title"
                 value={newTasks[column].title || ''}
                 onChange={(e) => handleInputChange(column, e)}
@@ -235,6 +236,7 @@ const ProjectPage = () => {
               />
               <input
                 type="text"
+                required
                 name="member"
                 placeholder="Assigned Member"
                 value={newTasks[column].member || ''}
@@ -244,6 +246,7 @@ const ProjectPage = () => {
               <input
                 type="date"
                 name="dueDate"
+                required
                 placeholder="Due Date"
                 value={newTasks[column].dueDate || ''}
                 onChange={(e) => handleInputChange(column, e)}

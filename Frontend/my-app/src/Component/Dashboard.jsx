@@ -1,3 +1,4 @@
+import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -9,6 +10,29 @@ const DashboardPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
   const location = useLocation();
+
+
+  // UseEffect to set userEmail when component mounts or location.state changes
+  const getEmail = async () => {
+
+   try {
+    const response = await axios.get('http://localhost:5000/login/success', { withCredentials: true });
+    const data= await response.data;
+    console.log(data);
+    console.log(data.data);
+    setUserEmail(data.data);
+    
+   } catch (error) {
+    console.error('Failed to fetch projects:', error);
+    
+   }
+  }
+
+  useEffect(() => {
+    getEmail();
+  }, []);
+
+    
 
   // UseEffect to set userEmail when component mounts or location.state changes
   useEffect(() => {

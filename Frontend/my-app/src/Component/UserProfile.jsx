@@ -107,15 +107,17 @@ const UserProfilePage = () => {
             <input
               type="text"
               placeholder="Username"
+              required
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className="w-full p-2 mt-2 border border-gray-300 rounded"
-              required
+              
             />
             {/* Remove email field from display */}
             <input
               type="password"
               placeholder="Change Password"
+              required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full p-2 mt-2 border border-gray-300 rounded"

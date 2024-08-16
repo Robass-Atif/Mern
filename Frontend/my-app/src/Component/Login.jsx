@@ -35,39 +35,22 @@ const LoginPage = () => {
     }
   };
 
-  const handleGoogleLoginSuccess = async (response) => {
-    try {
-      const tokenId = response.credential;
-      console.log("Token ID:", tokenId);  // Confirm that this prints the token
-      const res = await axios.post('http://localhost:5000/api/auth/google', {
-        tokenId,
-      });
-  
-      if (res.data.success) {
-        setMessage('Google login successful!');
-        navigate('/dashboard', { state: { email: res.data.email } });
-      } else {
-        setMessage(res.data.message || 'Google login failed.');
-      }
-    } catch (error) {
-      console.error('Google login error:', error);
-      setMessage('An error occurred with Google login. Please try again.');
-    }
+  const handleGoogleLoginSuccess = async () => {
+      window.open('http://localhost:5000/auth/google', '_self');
   };
-  
 
   return (
     <GoogleOAuthProvider clientId="904871389860-139ek3mn9vdr98hf85v5n4s7degvh0el.apps.googleusercontent.com">
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
-          <h2 className="text-2xl font-bold text-gray-800">Login</h2>
-          <form onSubmit={handleLogin} className="mt-4">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">Login</h2>
+          <form onSubmit={handleLogin} className="space-y-4">
             <input
               type="email"
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-2 mt-2 border border-gray-300 rounded"
+              className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
               required
             />
             <input
@@ -75,12 +58,12 @@ const LoginPage = () => {
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-2 mt-2 border border-gray-300 rounded"
+              className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
               required
             />
             <button
               type="submit"
-              className="w-full p-2 mt-4 bg-indigo-600 text-white rounded"
+              className="w-full p-3 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-all duration-200"
               disabled={loading}
             >
               {loading ? 'Logging In...' : 'Login'}
@@ -88,16 +71,16 @@ const LoginPage = () => {
           </form>
           {message && <p className="mt-4 text-center text-red-600">{message}</p>}
 
-          {/* Google Login Button */}
-          <div className="mt-4 text-center">
-            <GoogleLogin
-              onSuccess={handleGoogleLoginSuccess}
-              onError={() => setMessage('Google login failed. Please try again.')}
-            />
+          <div className="mt-6 text-center">
+            <button
+              onClick={handleGoogleLoginSuccess}
+              className="w-full p-3 bg-red-600 text-white rounded hover:bg-red-700 transition-all duration-200"
+            >
+              {loading ? 'Logging In...' : 'Login with Google'}
+            </button>
           </div>
 
-          {/* Sign Up Button */}
-          <div className="mt-4 text-center">
+          <div className="mt-6 text-center">
             <p className="text-gray-600">Don't have an account?</p>
             <button
               onClick={() => navigate('/signup')}

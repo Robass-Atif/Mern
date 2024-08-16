@@ -2,7 +2,18 @@ const asyncHandler = require('express-async-handler');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User = require('../Models/userModel');
+const UserOTPVerification = require('../Models/UserOTPVerification');
+const nodemailer = require('nodemailer');
 
+// Nodemailer
+let Transport=nodemailer.createTransport({
+  service: 'Gmail',
+  auth: {
+    user: "rcode6681@gmail.com", // Your email id
+    pass: "jgzlrbnujwtfppal"
+  }
+
+});
 // Generate JWT token
 const generateJWT = (id) => jwt.sign(
     { id },
@@ -28,19 +39,140 @@ const registerUser = asyncHandler(async (req, res) => {
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
 
-  const user = await User.create({ name, email, password: hashedPassword });
-  if (user) {
-      res.status(201).json({
-          _id: user._id,
-          name: user.name,
-          email: user.email,
-          token: generateJWT(user._id),
-          success: true
-      });
-  } else {
-      res.status(400).json({ message: 'Invalid user data' });
+  
+  const user = await User.create({
+
+      name,
+      email,
+      password: hashedPassword
+
+  });
+  user.save().then((result) => {
+    
+    sendOTP(result, res);
+
+  }).catch((err) => {
+    res.status(500).json({ error: 'Server error' });
   }
+  );
+
+
+
 });
+
+
+// send otp verification email
+const send=async ({_id,email}, res) => {
+  
+try
+{
+
+  const otp= `${Math.floor(1000 + Math.random() * 9000)}`;
+
+
+  // mail options
+  let mailOptions={
+    from: 'rrcode6681@gmail.com',
+    to: email,
+    subject: 'Please confirm your account',
+    html: `Hello,<br> Please confirm your account by entering the following OTP: <b>${otp}</b>
+    <br>OTP is valid for 10 minutes only.<br>`
+
+
+  };
+
+
+  //hash the otp
+  const salt = await bcrypt.genSalt(10);
+  const hashedOTP = await bcrypt.hash(otp, salt);
+  newOTP = new UserOTPVerification({
+    user_id: _id,
+    otp: hashedOTP,
+    expires_at: new Date(Date.now() + 10 * 60000)
+  });
+  await newOTP.save();
+  //send mail
+  await Transport.sendMail(mailOptions);
+
+  res.status(200).json({ success: true, message: 'OTP sent successfully' 
+    ,
+    Data: {
+      _id: _id,
+      email: email,
+    }
+  });
+
+
+}
+catch (error) {
+  res.status(500).json({ error: 'Server error' });
+}
+
+}
+;
+
+// verify email
+
+const verifyEmail=asyncHandler(async (req,res) =>
+{
+  const {userId, otp } = req.body;
+
+  if (!email || !otp) {
+      res.status(400).json({ message: 'All fields are mandatory' });
+      return;
+  }
+
+  const userOTPVerificationRecord=await UserOTPVerification.find({user_id: userId});
+
+    if(userOTPVerificationRecord.length<=0)
+    {
+      res.status(400).json({ message: 'Invalid OTP' });
+      return;
+    }
+    else
+    {
+      //user Otp verification record found
+      // const {expires_at}=userOTPVerificationRecord[0];
+
+      //check if otp is expired
+      const hashedOTP=userOTPVerificationRecord.otp;
+
+      
+      const isExpired=expires_at<Date.now();
+      if(isExpired)
+      {
+        res.status(400).json({ message: 'OTP expired' });
+        return;
+      }
+      else
+      {
+        //otp is not expired
+        //compare otp
+        const isMatch=await bcrypt.compare(otp,hashedOTP);
+        if(isMatch)
+        {
+          //otp matched
+          //update user as verified
+          await User.findByIdAndUpdate(userId,{isVerified:true});
+          await UserOTPVerification.deleteMany({user_id:userId});
+          res.status(200).json({ success: true, message: 'Email verified successfully' });
+        }
+        else
+        {
+          res.status(400).json({ message: 'Invalid OTP' });
+          return;
+        }
+      }
+
+
+
+    }
+
+
+}
+
+);
+
 
 // Login User
 const loginUser = asyncHandler(async (req, res) => {
@@ -104,7 +236,7 @@ const updateUser = asyncHandler(async (req, res) => {
 
     // Update the username if provided
     if (username) {
-      user.username = username;
+      user.name = username;
     }
 
     // Update the password if provided

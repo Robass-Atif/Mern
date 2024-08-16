@@ -23,7 +23,7 @@ const SignupPage = () => {
 
       if (response.data.success) {
         setMessage('Signup successful!');
-        navigate('/login');
+        navigate('/VerifyEmial');
       } else {
         setMessage(response.data.message || 'Signup failed');
       }

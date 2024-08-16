@@ -1,5 +1,3 @@
-// index.js
-
 // Load environment variables from .env file
 require('dotenv').config();
 
@@ -7,14 +5,19 @@ require('dotenv').config();
 const express = require('express');
 const connectDB = require('./Connect/database');
 const passport = require('passport');
-const session = require('express-session'); // Import express-session
-const cors = require('cors'); // Import CORS middleware
+const session = require('express-session');
+const cors = require('cors');
+const User = require('./Models/userModel');
 
 // Import routes
 const projectRoutes = require('./routes/projectRoutes');
 const taskRoutes = require('./routes/taskRoutes');
 const userRoutes = require('./routes/userRoutes');
-const authRoutes = require('./routes/authRoutes'); // Ensure correct path for authRoutes
+// const authRoutes = require('./routes/authRoutes'); // Uncomment if you have authRoutes
+
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const googleId = "697063750023-7nha10stlk2j37gijq3p2kvgbmpmpu9r.apps.googleusercontent.com";
+const googleSecret = "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";
 
 // Initialize express app
 const app = express();
@@ -25,35 +28,112 @@ connectDB();
 // Use CORS middleware
 app.use(cors({
   origin: 'http://localhost:3000', // Allow requests from this origin
-  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed HTTP methods
-  allowedHeaders: ['Content-Type', 'Authorization'] // Allowed headers
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true // Allow cookies and credentials
 }));
 
-// Initialize session middleware
+
+// Set session
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'your-secret-key',
+  secret: "sfjjjdlsjasl23",
   resave: false,
-  saveUninitialized: false,
-  cookie: { secure: process.env.NODE_ENV === 'production' } // Set to true if using HTTPS
+  saveUninitialized: true
 }));
+
+// Initialize passport and session middleware
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.use(new GoogleStrategy({
+  clientID: googleId,
+  clientSecret: googleSecret,
+  callbackURL: "http://localhost:5000/auth/google/callback",
+  scope: ["profile", "email"]
+},
+async function(accessToken, refreshToken, profile, done) {
+  // console.log("Profile", profile);
+
+  try {
+    // Find a user by their email address
+    let user = await User.findOne({ email: profile.emails[0].value });
+
+    if (!user) {
+      // If the user does not exist, create a new user
+      user = new User({
+        name: profile.displayName,
+        email: profile.emails[0].value,
+        // Add provider field if you have it in your schema
+      });
+
+      // Save the new user to the database
+      await user.save();
+    }
+
+    // Pass the user object to the `done` callback
+    return done(null, user);
+  } catch (error) {
+    // Handle any errors that occur
+    return done(error, null);
+  }
+}));
+
+
+passport.serializeUser(function(user, done) {
+  done(null, user.id);
+});
+
+passport.deserializeUser(async (id, done) => {
+  try {
+    const user = await User.findById(id);
+    if (user) {
+      done(null, user);
+    } else {
+      done(new Error('User not found'), null);
+    }
+  } catch (error) {
+    done(error, null);
+  }
+});
+
+
+app.get('/auth/google', passport.authenticate('google', { scope: ["profile", "email"] }));
+
+app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: 'http://localhost:3000/login' }), function(req, res) {
+  res.redirect('http://localhost:3000/dashboard');
+});
+
+
+app.get('/login/success', (req, res) => {
+  console.log(req.user);
+  if (req.user) {
+    res.json({
+      success: true,
+      message: "User has successfully authenticated",
+      data: req.user.email,
+      cookies: req.cookies
+    });
+  } else {
+    res.status(401).json({
+      success: false,
+      message: "User has not authenticated"
+    });
+  }
+});
 
 // Parse incoming JSON requests
 app.use(express.json());
-
-// Initialize passport
-app.use(passport.initialize());
-app.use(passport.session());
 
 // Use routes
 app.use('/api/projects', projectRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/auth', authRoutes);
+// app.use('/api/auth', authRoutes);
 
 // Global error handling middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack); // Log error stack for debugging
-  res.status(500).send('Something broke!'); // Send a generic error message
+  console.error(err.stack);
+  res.status(500).send('Something broke!');
 });
 
 // Define PORT
@@ -63,3 +143,4 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+

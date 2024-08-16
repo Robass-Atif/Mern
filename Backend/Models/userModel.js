@@ -18,7 +18,11 @@ const userSchema = mongoose.Schema({ // Create a user schema.
     },
     password: {
         type: String, // The password field will be a string.
-        required: [true, 'Password is required'] // The password field is required and the error message if it is not provided.
+        required: [false, 'Password is required'] // The password field is required and the error message if it is not provided.
+    },
+    isVerfied: {
+        type: Boolean,
+        default: false
     },
     resetPasswordToken: { type: String },
     resetPasswordExpires: { type: Date },
