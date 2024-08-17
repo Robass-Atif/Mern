@@ -121,14 +121,14 @@ const UserId= await User.findById(_id);
 
 const verifyEmail = asyncHandler(async (req, res) => {
   const { userId, otp } = req.body;
-  console.log(userId, otp);
+  // console.log(userId, otp);
 
   // Find the OTP verification record for the user
   const userOTPVerificationRecord = await UserOTPVerification.findOne({
     user: userId,
   });
   const useremail= await User.findById(userId);
-  console.log(useremail);
+  // console.log(useremail);
   const email=useremail.email;
 
   // console.log(userOTPVerificationRecord);
@@ -140,7 +140,7 @@ const verifyEmail = asyncHandler(async (req, res) => {
   // Check if OTP is expired
   const { expires_at, otp: hashedOTP } = userOTPVerificationRecord;
   const isExpired = expires_at < Date.now();
-  console.log(isExpired);
+  // console.log(isExpired);
 
   if (isExpired) {
     return res.status(400).json({ message: "OTP expired" });
@@ -215,14 +215,14 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 
 const ResendOTP = asyncHandler(async (req, res) => {
   const { userId} = req.body;
-  console.log(userId);
+  // console.log(userId);
 
   // Find the user by email
   const user = await User.findById(userId);
 
  const result= await UserOTPVerification.deleteMany({ user: userId });
  const bye=await  User.findByIdAndDelete(userId);
- console.log("delete",result);
+//  console.log("delete",result);
 
  if(result)
  {
