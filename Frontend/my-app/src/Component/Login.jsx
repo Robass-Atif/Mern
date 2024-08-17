@@ -9,6 +9,7 @@ const LoginPage = () => {
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const [isVisible, setIsVisible] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -40,7 +41,7 @@ const LoginPage = () => {
   };
 
   return (
-    <GoogleOAuthProvider clientId="904871389860-139ek3mn9vdr98hf85v5n4s7degvh0el.apps.googleusercontent.com">
+    <GoogleOAuthProvider clientId="697063750023-7nha10stlk2j37gijq3p2kvgbmpmpu9r.apps.googleusercontent.com">
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
           <h2 className="text-2xl font-bold text-gray-800 mb-4">Login</h2>

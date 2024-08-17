@@ -10,6 +10,8 @@ const DashboardPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
   const location = useLocation();
+  const [isVisible, setIsVisible] = useState(false);
+
 
 
   // UseEffect to set userEmail when component mounts or location.state changes
@@ -21,6 +23,7 @@ const DashboardPage = () => {
     console.log(data);
     console.log(data.data);
     setUserEmail(data.data);
+    setIsVisible(true);
     
    } catch (error) {
     console.error('Failed to fetch projects:', error);
@@ -130,12 +133,14 @@ const DashboardPage = () => {
         <nav className="flex justify-between items-center">
           <a href="#" className="text-lg font-bold">Dashboard</a>
           <div className="flex items-center">
+            {!isVisible && 
             <button
               onClick={handleProfileClick}
               className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg"
             >
               Profile
             </button>
+}
           </div>
         </nav>
       </header>

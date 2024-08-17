@@ -23,7 +23,10 @@ const SignupPage = () => {
 
       if (response.data.success) {
         setMessage('Signup successful!');
-        navigate('/VerifyEmial');
+        console.log(response.data.Data._id);
+       const userId=response.data.Data._id;
+       console.log("Signup UserId",userId);
+        navigate('/VerifyEmial' ,{ state: { userId } });
       } else {
         setMessage(response.data.message || 'Signup failed');
       }
@@ -54,7 +57,7 @@ const SignupPage = () => {
   };
 
   return (
-    <GoogleOAuthProvider clientId="904871389860-139ek3mn9vdr98hf85v5n4s7degvh0el.apps.googleusercontent.com">
+    <GoogleOAuthProvider clientId="697063750023-7nha10stlk2j37gijq3p2kvgbmpmpu9r.apps.googleusercontent.com">
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
           <h2 className="text-2xl font-bold text-gray-800">Sign Up</h2>

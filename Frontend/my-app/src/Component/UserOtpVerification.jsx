@@ -1,96 +1,91 @@
 import React, { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 
-function UserOtpVerification() {
+const OtpVerification = () => {
   const [otp, setOtp] = useState('');
-  const [message, setMessage] = useState('');
-  const [isOtpSent, setIsOtpSent] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { userId } = location.state || {}; // Extract userId from the state
 
-  const handleOtpChange = (e) => {
+  const handleInputChange = (e) => {
     setOtp(e.target.value);
   };
 
-  const handleOtpSubmit = async (e) => {
-    e.preventDefault();
+
+
+
+  const handleVerifyOtp = async () => {
+    // Logic for verifying OTP
     try {
-      const response = await verifyOtp(otp);
-      if (response.success) {
-        setMessage('OTP Verified Successfully!');
+      console.log('UserId:', userId);
+      const response = await fetch('http://localhost:5000/api/users/VerifyOTP', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ otp, userId }), // Include userId in the API call
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        // Handle successful OTP verification
+        const email = data.email;
+        console.log("Email", email);
+        alert('OTP Verified');
+        navigate('/dashboard', { state: { email } }); // Redirect to a success page or dashboard
       } else {
-        setMessage('Invalid OTP. Please try again.');
+        // Handle OTP verification failure
+        alert('Invalid OTP');
       }
     } catch (error) {
-      setMessage('An error occurred during verification.');
+      console.error('Error verifying OTP:', error);
+      alert('An error occurred while verifying OTP');
     }
   };
 
-  const sendOtp = async () => {
-    try {
-      const response = await requestOtp();
-      if (response.success) {
-        setMessage('OTP has been sent to your registered email.');
-        setIsOtpSent(true);
-      } else {
-        setMessage('Failed to send OTP. Please try again.');
-      }
-    } catch (error) {
-      setMessage('An error occurred while sending OTP.');
-    }
-  };
+  const backToSignUP = async () => {
+
+    const response = await fetch('http://localhost:5000/api/users/ResendOTP', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userId }),
+    });
+  
+      navigate('/signup');
+    };
 
   return (
-    <div className="otp-container">
-      <h2>OTP Verification</h2>
-      <button onClick={sendOtp} disabled={isOtpSent}>
-        Send OTP
+    <div className="flex flex-col items-center justify-center h-screen bg-gray-100 p-4">
+      {/* Back to Signup button positioned at the top left */}
+      <button
+        onClick={backToSignUP}
+        className="absolute top-4 left-4 p-2 text-white bg-gray-600 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
+      >
+        Back to Signup
       </button>
-      {isOtpSent && (
-        <form onSubmit={handleOtpSubmit}>
-          <input
-            type="text"
-            value={otp}
-            onChange={handleOtpChange}
-            placeholder="Enter OTP"
-            maxLength="6"
-          />
-          <button type="submit">Verify OTP</button>
-        </form>
-      )}
-      {message && <p>{message}</p>}
+
+      <div className="w-full max-w-xs mt-12">
+        <h2 className="text-center text-2xl font-bold mb-6">OTP Verification</h2>
+        <input
+          type="number"
+          value={otp}
+          onChange={handleInputChange}
+          maxLength={5}
+          placeholder="Enter OTP"
+          className="w-full p-3 mb-4 text-center text-xl border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        />
+        <button
+          onClick={handleVerifyOtp}
+          className="w-full p-3 text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        >
+          Verify OTP
+        </button>
+      </div>
     </div>
   );
-}
+};
 
-// API function to request OTP
-async function requestOtp() {
-  try {
-    const response = await fetch('/api/send-otp', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    return await response.json();
-  } catch (error) {
-    console.error('Error sending OTP:', error);
-    return { success: false };
-  }
-}
-
-// API function to verify OTP
-async function verifyOtp(otp) {
-  try {
-    const response = await fetch('/api/verify-otp', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ otp }),
-    });
-    return await response.json();
-  } catch (error) {
-    console.error('Error verifying OTP:', error);
-    return { success: false };
-  }
-}
-
-export default UserOtpVerification;
+export default OtpVerification;

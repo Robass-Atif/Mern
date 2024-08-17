@@ -1,194 +1,190 @@
-const asyncHandler = require('express-async-handler');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
-const User = require('../Models/userModel');
-const UserOTPVerification = require('../Models/UserOTPVerification');
-const nodemailer = require('nodemailer');
+const asyncHandler = require("express-async-handler");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
+const User = require("../Models/userModel");
+const UserOTPVerification = require("../Models/UserOTPVerification");
+const nodemailer = require("nodemailer");
 
 // Nodemailer
-let Transport=nodemailer.createTransport({
-  service: 'Gmail',
+let Transport = nodemailer.createTransport({
+  service: "Gmail",
   auth: {
     user: "rcode6681@gmail.com", // Your email id
-    pass: ""
-  }
-
+    pass: "jgzlrbnujwtfppal",
+  },
 });
 // Generate JWT token
-const generateJWT = (id) => jwt.sign(
+const generateJWT = (id) =>
+  jwt.sign(
     { id },
     process.env.JWT_SECRET || "default_secret_key", // Use environment variable or a default secret key
-    { expiresIn: '5d' }
-);
+    { expiresIn: "5d" }
+  );
 
 // Register User
 const registerUser = asyncHandler(async (req, res) => {
   const { name, email, password } = req.body;
+  // console.log(name,password,email);
 
-  if (!name || !email || !password) {
-      res.status(400).json({ message: 'All fields are mandatory' });
-      return;
-  }
+  // if (!name || !email || !password) {
+  //   res.status(400).json({ message: "All fields are mandatory" });
+  //   return;
+  // }
 
   const userExists = await User.findOne({ email });
   if (userExists) {
-      res.status(400).json({ message: 'User already exists' });
-      return;
+    res.status(400).json({ message: "User already exists" });
+    return;
   }
 
+  // console.log("send user 0 ");
   const salt = await bcrypt.genSalt(10);
+  // console.log(password);
+  // console.log("send user 0.1 ",salt);
   const hashedPassword = await bcrypt.hash(password, salt);
+  // console.log("send user 1 ");
 
-  
+
   const user = await User.create({
-
-      name,
-      email,
-      password: hashedPassword
-
+    name,
+    email,
+    password: hashedPassword,
   });
-  user.save().then((result) => {
-    
-    sendOTP(result, res);
+// console.log("send user 2 ");
 
-  }).catch((err) => {
-    res.status(500).json({ error: 'Server error' });
-  }
-  );
-
-
-
+ await user.save()
+    .then((result) => {
+      // console.log("send otp 0 ");
+      sendOTP(result, res);
+      // console.log("send otp 4 ");
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json({ error: "Server error" });
+    });
 });
 
-
 // send otp verification email
-const send=async ({_id,email}, res) => {
+const sendOTP = async ({ _id, email }, res) => {
+  try {
+    // console.log("send otp 1 ");
+    const otp = `${Math.floor(1000 + Math.random() * 9000)}`;
+
+    // mail options
+    let mailOptions = {
+      from: "rrcode6681@gmail.com",
+      to: email,
+      subject: "Please confirm your account",
+      html: `Hello,<br> Please confirm your account by entering the following OTP: <b>${otp}</b>
+    <br>OTP is valid for 10 minutes only.<br>`,
+    };
+    // console.log("send otp 2 ");
+
+// console.log(otp)
+    //hash the otp
+    const salt = await bcrypt.genSalt(5);
+// console.log(otp,salt)
+
+const UserId= await User.findById(_id);
+// console.log(UserId);
+
+    const hashedOTP = await bcrypt.hash(otp, salt);
   
-try
-{
+ const   fOTP = new UserOTPVerification({
+      user: UserId._id,
+      otp: hashedOTP,
+      createdAt: new Date(Date.now()),
+      expires_at: new Date(Date.now() + 10 * 60000)
+    });
+    console.log(fOTP);  
+    // console.log(fOTP);
+    await fOTP.save();
+    // console.log("send otp 3 ");
 
-  const otp= `${Math.floor(1000 + Math.random() * 9000)}`;
+    //send mail
+    await Transport.sendMail(mailOptions);
+    
 
-
-  // mail options
-  let mailOptions={
-    from: 'rrcode6681@gmail.com',
-    to: email,
-    subject: 'Please confirm your account',
-    html: `Hello,<br> Please confirm your account by entering the following OTP: <b>${otp}</b>
-    <br>OTP is valid for 10 minutes only.<br>`
-
-
-  };
-
-
-  //hash the otp
-  const salt = await bcrypt.genSalt(10);
-  const hashedOTP = await bcrypt.hash(otp, salt);
-  newOTP = new UserOTPVerification({
-    user_id: _id,
-    otp: hashedOTP,
-    expires_at: new Date(Date.now() + 10 * 60000)
-  });
-  await newOTP.save();
-  //send mail
-  await Transport.sendMail(mailOptions);
-
-  res.status(200).json({ success: true, message: 'OTP sent successfully' 
-    ,
-    Data: {
-      _id: _id,
-      email: email,
-    }
-  });
-
-
-}
-catch (error) {
-  res.status(500).json({ error: 'Server error' });
-}
-
-}
-;
-
+    res.status(200).json({
+      success: true,
+      message: "OTP sent successfully",
+      Data: {
+        _id: _id,
+        email: email,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Server error" });
+  }
+};
 // verify email
 
-const verifyEmail=asyncHandler(async (req,res) =>
-{
-  const {userId, otp } = req.body;
+const verifyEmail = asyncHandler(async (req, res) => {
+  const { userId, otp } = req.body;
+  console.log(userId, otp);
 
-  if (!email || !otp) {
-      res.status(400).json({ message: 'All fields are mandatory' });
-      return;
+  // Find the OTP verification record for the user
+  const userOTPVerificationRecord = await UserOTPVerification.findOne({
+    user: userId,
+  });
+  const useremail= await User.findById(userId);
+  console.log(useremail);
+  const email=useremail.email;
+
+  // console.log(userOTPVerificationRecord);
+
+  if (!userOTPVerificationRecord) {
+    return res.status(400).json({ message: "Invalid OTP" });
   }
 
-  const userOTPVerificationRecord=await UserOTPVerification.find({user_id: userId});
+  // Check if OTP is expired
+  const { expires_at, otp: hashedOTP } = userOTPVerificationRecord;
+  const isExpired = expires_at < Date.now();
+  console.log(isExpired);
 
-    if(userOTPVerificationRecord.length<=0)
-    {
-      res.status(400).json({ message: 'Invalid OTP' });
-      return;
+  if (isExpired) {
+    return res.status(400).json({ message: "OTP expired" });
+  }
+
+  // Compare OTP
+  try {
+    console.log(otp, hashedOTP);
+    const isMatch = await bcrypt.compare(otp, hashedOTP);
+
+    if (isMatch) {
+      // OTP matched, update user as verified
+      console.log("OTP matched, update user as verified");
+      // await User.findByIdAndUpdate(userId, { isVerified: true });
+      useremail.isVerified=true;
+      await UserOTPVerification.deleteMany({ user: userId });
+      console.log("Email verified successfully");
+      return res.status(200).json({ success: true, message: "Email verified successfully" ,email:email });
+    } else {
+      return res.status(400).json({ message: "Invalid OTP" });
     }
-    else
-    {
-      //user Otp verification record found
-      // const {expires_at}=userOTPVerificationRecord[0];
-
-      //check if otp is expired
-      const hashedOTP=userOTPVerificationRecord.otp;
-
-      
-      const isExpired=expires_at<Date.now();
-      if(isExpired)
-      {
-        res.status(400).json({ message: 'OTP expired' });
-        return;
-      }
-      else
-      {
-        //otp is not expired
-        //compare otp
-        const isMatch=await bcrypt.compare(otp,hashedOTP);
-        if(isMatch)
-        {
-          //otp matched
-          //update user as verified
-          await User.findByIdAndUpdate(userId,{isVerified:true});
-          await UserOTPVerification.deleteMany({user_id:userId});
-          res.status(200).json({ success: true, message: 'Email verified successfully' });
-        }
-        else
-        {
-          res.status(400).json({ message: 'Invalid OTP' });
-          return;
-        }
-      }
-
-
-
-    }
-
-
-}
-
-);
-
+  } catch (error) {
+    console.error('Error comparing OTP:', error);
+    return res.status(500).json({ message: "Server error" });
+  }
+});
 
 // Login User
 const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
   const user = await User.findOne({ email });
-  if (user && await bcrypt.compare(password, user.password)) {
-      res.json({
-          _id: user._id,
-          name: user.name,
-          email: user.email,
-          token: generateJWT(user._id),
-          success: true
-      });
+  if (user && (await bcrypt.compare(password, user.password))) {
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      token: generateJWT(user._id),
+      success: true,
+    });
   } else {
-      res.status(400).json({ message: 'Invalid email or password', success: false });
+    res
+      .status(400)
+      .json({ message: "Invalid email or password", success: false });
   }
 });
 
@@ -197,29 +193,50 @@ const getCurrentUser = asyncHandler(async (req, res) => {
   const { email } = req.body; // Use req.body for POST request
   // console.log(email);
 
-
   if (!email) {
-    return res.status(400).json({ error: 'Email is required' });
+    return res.status(400).json({ error: "Email is required" });
   }
 
   try {
     const user = await User.findOne({ email });
-    
-
 
     // now send the response
     res.status(200).json({
       _id: user._id,
       name: user.name,
       email: user.email,
-      
-      success: true
+
+      success: true,
     });
   } catch (error) {
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: "Server error" });
   }
 });
 
+const ResendOTP = asyncHandler(async (req, res) => {
+  const { userId} = req.body;
+  console.log(userId);
+
+  // Find the user by email
+  const user = await User.findById(userId);
+
+ const result= await UserOTPVerification.deleteMany({ user: userId });
+ const bye=await  User.findByIdAndDelete(userId);
+ console.log("delete",result);
+
+ if(result)
+ {
+    res.status(200).json({success:true,message:"OTP Resend Successfully"});
+
+ }
+  else{
+    res.status(500).json({ error: "Server error" });
+  }
+
+
+
+
+});
 
 // Update Username
 const updateUser = asyncHandler(async (req, res) => {
@@ -231,7 +248,7 @@ const updateUser = asyncHandler(async (req, res) => {
 
     if (!user) {
       res.status(404);
-      throw new Error('User not found');
+      throw new Error("User not found");
     }
 
     // Update the username if provided
@@ -249,35 +266,38 @@ const updateUser = asyncHandler(async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'User updated successfully',
+      message: "User updated successfully",
     });
   } catch (error) {
     res.status(500);
-    throw new Error('Failed to update user');
+    throw new Error("Failed to update user");
   }
-
-  
-  
 });
 
 // Update Password
 
-
 const updatePassword = asyncHandler(async (req, res) => {
   // Get userId from URL parameters
   const userId = req.params.id;
-  
 
   // Find the user by userId
   const user = await User.findById(userId);
-  
+
   // Check if user exists
   if (!user) {
-    return res.status(404).json({ error: 'User not found' });
+    return res.status(404).json({ error: "User not found" });
   }
 
   // Send the user's email in the response
   res.status(200).json({ email: user.email });
 });
 
-module.exports = { registerUser, loginUser, getCurrentUser, updatePassword, updateUser };
+module.exports = {
+  registerUser,
+  loginUser,
+  getCurrentUser,
+  updatePassword,
+  updateUser,
+  verifyEmail,
+  ResendOTP,
+};
