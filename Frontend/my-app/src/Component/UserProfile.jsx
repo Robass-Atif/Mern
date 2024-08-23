@@ -26,7 +26,7 @@ const UserProfilePage = () => {
       const fetchUserData = async () => {
         try {
           const token = localStorage.getItem('authToken'); 
-          const response = await fetch('http://localhost:5000/api/users/user', {
+          const response = await fetch('https://mern-mu-ecru.vercel.app/api/users/user', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -63,7 +63,7 @@ const UserProfilePage = () => {
 
     // Update user information using the API
     try {
-      const response = await fetch('http://localhost:5000/api/users/update-user', {
+      const response = await fetch('https://mern-mu-ecru.vercel.app/api/users/update-user', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -18,7 +18,7 @@ const OtpVerification = () => {
     // Logic for verifying OTP
     try {
       console.log('UserId:', userId);
-      const response = await fetch('http://localhost:5000/api/users/VerifyOTP', {
+      const response = await fetch('https://mern-mu-ecru.vercel.app/api/users/VerifyOTP', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -46,7 +46,7 @@ const OtpVerification = () => {
 
   const backToSignUP = async () => {
 
-    const response = await fetch('http://localhost:5000/api/users/ResendOTP', {
+    const response = await fetch('https://mern-mu-ecru.vercel.app/api/users/ResendOTP', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -15,7 +15,7 @@ const SignupPage = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await axios.post('http://localhost:5000/api/users', {
+      const response = await axios.post('https://mern-mu-ecru.vercel.app/api/users', {
         name,
         email,
         password,
@@ -40,7 +40,7 @@ const SignupPage = () => {
   const handleGoogleSignup = async (response) => {
     try {
       const token = response.credential;
-      const googleResponse = await axios.post('http://localhost:5000/api/auth/google', {
+      const googleResponse = await axios.post('https://mern-mu-ecru.vercel.app/api/auth/google', {
         token,
       });
 

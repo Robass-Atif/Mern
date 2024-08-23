@@ -16,7 +16,7 @@ const LoginPage = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/users/login', {
+      const response = await axios.post('https://mern-mu-ecru.vercel.app/api/users/login', {
         email,
         password,
       });
@@ -37,7 +37,7 @@ const LoginPage = () => {
   };
 
   const handleGoogleLoginSuccess = async () => {
-      window.open('http://localhost:5000/auth/google', '_self');
+      window.open('https://mern-mu-ecru.vercel.app/auth/google', '_self');
   };
 
   return (
