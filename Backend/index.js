@@ -29,11 +29,12 @@ connectDB();
 
 // Use CORS middleware
 app.use(cors({
-  origin: 'http://localhost:3000', // Allow requests from this origin
+  origin: 'https://mern-mu-ecru.vercel.app', // Allow requests from your frontend
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true // Allow cookies and credentials
 }));
+
 
 
 // Set session
