@@ -13,13 +13,12 @@ const User = require('./Models/userModel');
 const projectRoutes = require('./routes/projectRoutes');
 const taskRoutes = require('./routes/taskRoutes');
 const userRoutes = require('./routes/userRoutes');
-// const authRoutes = require('./routes/authRoutes'); // Uncomment if you have authRoutes
 
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 
-const googleId = "697063750023-7nha10stlk2j37gijq3p2kvgbmpmpu9r.apps.googleusercontent.com";
-const googleSecret = "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";
-
+// Google OAuth credentials
+const googleId = process.env.GOOGLE_CLIENT_ID || "697063750023-7nha10stlk2j37gijq3p2kvgbmpmpu9r.apps.googleusercontent.com";
+const googleSecret = process.env.GOOGLE_CLIENT_SECRET || "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";
 
 // Initialize express app
 const app = express();
@@ -29,17 +28,15 @@ connectDB();
 
 // Use CORS middleware
 app.use(cors({
-  origin: 'https://mern-mu-ecru.vercel.app', // Allow requests from your frontend
+  origin: process.env.CLIENT_URL || 'https://mern-mu-ecru.vercel.app', // Allow requests from frontend
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true // Allow cookies and credentials
 }));
 
-
-
 // Set session
 app.use(session({
-  secret: "sfjjjdlsjasl23",
+  secret: process.env.SESSION_SECRET || "sfjjjdlsjasl23",
   resave: false,
   saveUninitialized: true
 }));
@@ -51,36 +48,26 @@ app.use(passport.session());
 passport.use(new GoogleStrategy({
   clientID: googleId,
   clientSecret: googleSecret,
-  callbackURL: "http://localhost:5000/auth/google/callback",
+  callbackURL: process.env.GOOGLE_CALLBACK_URL || "https://mern-mu-ecru.vercel.app/auth/google/callback",
   scope: ["profile", "email"]
 },
 async function(accessToken, refreshToken, profile, done) {
-  // console.log("Profile", profile);
-
   try {
-    // Find a user by their email address
     let user = await User.findOne({ email: profile.emails[0].value });
 
     if (!user) {
-      // If the user does not exist, create a new user
       user = new User({
         name: profile.displayName,
         email: profile.emails[0].value,
-        // Add provider field if you have it in your schema
       });
-
-      // Save the new user to the database
       await user.save();
     }
 
-    // Pass the user object to the `done` callback
     return done(null, user);
   } catch (error) {
-    // Handle any errors that occur
     return done(error, null);
   }
 }));
-
 
 passport.serializeUser(function(user, done) {
   done(null, user.id);
@@ -99,16 +86,14 @@ passport.deserializeUser(async (id, done) => {
   }
 });
 
-
+// Google OAuth routes
 app.get('/auth/google', passport.authenticate('google', { scope: ["profile", "email"] }));
 
-app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: 'http://localhost:3000/login' }), function(req, res) {
-  res.redirect('http://localhost:3000/dashboard');
+app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: `${process.env.CLIENT_URL}/login` }), function(req, res) {
+  res.redirect(`${process.env.CLIENT_URL}/dashboard`);
 });
 
-
 app.get('/login/success', (req, res) => {
-
   if (req.user) {
     res.json({
       success: true,
@@ -131,7 +116,6 @@ app.use(express.json());
 app.use('/api/projects', projectRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/users', userRoutes);
-// app.use('/api/auth', authRoutes);
 
 // Global error handling middleware
 app.use((err, req, res, next) => {
@@ -146,4 +130,3 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
-
