@@ -24,7 +24,7 @@ const generateJWT = (id) =>
 // Register User
 const registerUser = asyncHandler(async (req, res) => {
   const { name, email, password } = req.body;
-  // console.log(name,password,email);
+  
 
   // if (!name || !email || !password) {
   //   res.status(400).json({ message: "All fields are mandatory" });
@@ -37,12 +37,11 @@ const registerUser = asyncHandler(async (req, res) => {
     return;
   }
 
-  // console.log("send user 0 ");
+  
   const salt = await bcrypt.genSalt(10);
-  // console.log(password);
-  // console.log("send user 0.1 ",salt);
+  
   const hashedPassword = await bcrypt.hash(password, salt);
-  // console.log("send user 1 ");
+  
 
 
   const user = await User.create({
@@ -50,7 +49,7 @@ const registerUser = asyncHandler(async (req, res) => {
     email,
     password: hashedPassword,
   });
-// console.log("send user 2 ");
+
 
  await user.save()
     .then((result) => {
